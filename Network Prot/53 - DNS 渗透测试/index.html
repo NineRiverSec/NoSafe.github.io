@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://nosafe.wiki/Network%20Prot/53%20-%20DNS%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>53 - DNS 渗透测试 - No Safe - 明摆暗卷</title>
+    <link href="../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\u57fa\u672c\u4fe1\u606f", url: "#_top", children: [
+              {title: "\u4e0d\u540c\u7684 DNS \u670d\u52a1\u5668", url: "#dns" },
+          ]},
+          {title: "\u679a\u4e3e", url: "#_2", children: [
+              {title: "Banner \u6293\u53d6", url: "#banner" },
+              {title: "\u4efb\u4f55\u8bb0\u5f55", url: "#_3" },
+              {title: "\u533a\u57df\u8f6c\u79fb", url: "#_4" },
+              {title: "\u66f4\u591a\u4fe1\u606f", url: "#_5" },
+              {title: "\u4f7f\u7528metasploit \u6a21\u5757", url: "#metasploit" },
+              {title: "\u4f7f\u7528nmap \u811a\u672c", url: "#nmap" },
+              {title: "DNS \u53cd\u5411\u66b4\u529b\u7834\u89e3", url: "#dns_1" },
+              {title: "DNS - \u5b50\u57df\u540d\u66b4\u529b\u7834\u89e3", url: "#dns-" },
+              {title: "\u6d3b\u52a8\u76ee\u5f55\u670d\u52a1\u5668", url: "#_6" },
+              {title: "DNS\u5b89\u5168", url: "#dns_2" },
+              {title: "IPv6", url: "#ipv6" },
+              {title: "DNS \u9012\u5f52 DDoS \u653b\u51fb", url: "#dns-ddos" },
+              {title: "\u90ae\u5bc4\u5230\u4e0d\u5b58\u5728\u7684\u5e10\u6237", url: "#_7" },
+          ]},
+          {title: "\u914d\u7f6e\u6587\u4ef6", url: "#_8", children: [
+          ]},
+          {title: "\u81ea\u52a8\u5316\u547d\u4ee4", url: "#_9", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../js/base.js"></script>
+      <script src="../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../69-udp-tftp%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../69-udp-tftp%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        69 - udp/tftp渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../49-TACACS%2B%E6%B8%97%E9%80%8F/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../49-TACACS%2B%E6%B8%97%E9%80%8F/" class="btn btn-xs btn-link">
+        49 - TACACS 渗透
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h2 id="_1">基本信息</h2>
+<p>域名系统 (DNS) 是 Internet 的电话簿。人们通过域名在线访问信息，例如 nytimes.com 或 espn.com。Web 浏览器通过 Internet 协议 (IP) 地址进行交互。DNS 将域名转换为<a href="https://www.cloudflare.com/learning/dns/glossary/what-is-my-ip-address/">IP 地址</a>，以便浏览器可以加载 Internet 资源。</p>
+<p><strong>默认端口:</strong> 53</p>
+<pre><code>PORT     STATE SERVICE  REASON
+53/tcp   open  domain  Microsoft DNS 6.1.7601 (1DB15D39) (Windows Server 2008 R2 SP1)
+5353/udp open  zeroconf udp-response
+53/udp   open  domain  Microsoft DNS 6.1.7601 (1DB15D39) (Windows Server 2008 R2 SP1)
+</code></pre>
+<h3 id="dns">不同的 DNS 服务器</h3>
+<p>信息来自 https://academy.hackthebox.com/module/112/section/1069</p>
+<table>
+<thead>
+<tr>
+<th><strong>服务器类型</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DNS Root Server</code></td>
+<td>DNS 的根服务器负责顶级域 ( <code>TLD</code>)。作为最后一个实例，只有在名称服务器没有响应时才会请求它们。因此，根服务器是 Internet 上用户和内容之间的中央接口，因为它链接域和 IP 地址。互联网<a href="https://www.icann.org/">名称与数字地址分配机构</a>( <code>ICANN</code>) 负责协调根名称服务器的工作。<code>13</code>全球都有这样的根服务器。</td>
+</tr>
+<tr>
+<td><code>Authoritative Nameserver</code></td>
+<td>权威名称服务器拥有特定区域的权威。他们只回答来自其职责范围内的询问，并且他们的信息具有约束力。如果权威名称服务器无法回答客户端的查询，则根名称服务器会在此时接管。</td>
+</tr>
+<tr>
+<td><code>Non-authoritative Nameserver</code></td>
+<td>非权威名称服务器不负责特定的 DNS 区域。相反，他们自己收集有关特定 DNS 区域的信息，这是使用递归或迭代 DNS 查询完成的。</td>
+</tr>
+<tr>
+<td><code>Caching DNS Server</code></td>
+<td>缓存 DNS 服务器在指定时间段内缓存来自其他名称服务器的信息。权威名称服务器决定此存储的持续时间。</td>
+</tr>
+<tr>
+<td><code>Forwarding Server</code></td>
+<td>转发服务器只执行一个功能：它们将 DNS 查询转发到另一台 DNS 服务器。</td>
+</tr>
+<tr>
+<td><code>Resolver</code></td>
+<td>解析器不是权威的 DNS 服务器，而是在计算机或路由器本地执行名称解析。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_2">枚举</h2>
+<h3 id="banner"><strong>Banner 抓取</strong></h3>
+<p>DNS 没有可抢的“旗帜”。<code>version.bind. CHAOS TXT</code>最接近的等效项是适用于大多数 BIND 名称服务器的魔术查询。
+您可以使用以下方式执行此查询<code>dig</code>：</p>
+<pre><code>dig version.bind CHAOS TXT @DNS
+</code></pre>
+<p>如果这不起作用，您可以使用指纹识别技术来确定远程服务器的版本——该<a href="https://github.com/kirei/fpdns"><code>fpdns</code></a>工具是一种选择，但还有其他选择。</p>
+<p><strong>您也可以使用nmap</strong>脚本获取Banner：</p>
+<pre><code>--script dns-nsid
+</code></pre>
+<h3 id="_3">任何记录</h3>
+<p>记录<strong>ANY</strong>将要求 DNS 服务器返回<strong>它</strong><strong>愿意公开的</strong>所有可用<strong>条目</strong>。</p>
+<pre><code>dig any victim.com @&lt;DNS_IP&gt;
+</code></pre>
+<h3 id="_4"><strong>区域转移</strong></h3>
+<p>此过程缩写为<code>Asynchronous Full Transfer Zone</code>( <code>AXFR</code>)。</p>
+<pre><code>dig axfr @&lt;DNS_IP&gt; #试图在没有域的情况下执行区域转移
+dig axfr @&lt;DNS_IP&gt; &lt;DOMAIN&gt; #试图通过猜测域来执行区域转移
+fierce --domain &lt;DOMAIN&gt; --dns-servers &lt;DNS_IP&gt; #如果针对每个授权的名称服务器执行区域转移不起作用，将启动字典攻击
+</code></pre>
+<h3 id="_5">更多信息</h3>
+<pre><code>dig ANY @&lt;DNS_IP&gt; &lt;DOMAIN&gt;     #任何信息
+dig A @&lt;DNS_IP&gt; &lt;DOMAIN&gt;       #常规 DNS 请求
+dig AAAA @&lt;DNS_IP&gt; &lt;DOMAIN&gt;    #IPv6 DNS 请求
+dig TXT @&lt;DNS_IP&gt; &lt;DOMAIN&gt;     #信息
+dig MX @&lt;DNS_IP&gt; &lt;DOMAIN&gt;      #电子邮件有关的内容
+dig NS @&lt;DNS_IP&gt; &lt;DOMAIN&gt;      #能够解析该名称的 DNS
+dig -x 192.168.0.2 @&lt;DNS_IP&gt;   #反向查找
+dig -x 2a00:1450:400c:c06::93 @&lt;DNS_IP&gt; #反向 IPv6 查找
+
+#Use [-p PORT]  or  -6 (to use ivp6 address of dns)
+</code></pre>
+<h4 id="nslookup">使用 nslookup</h4>
+<pre><code>nslookup
+&gt; SERVER &lt;IP_DNS&gt; #选择 DNS 服务器
+&gt; 127.0.0.1 #可能是反向查找的 127.0.0.1...
+&gt; &lt;IP_MACHINE&gt; #可能是反向查找的一台机器...
+</code></pre>
+<h3 id="metasploit">使用metasploit 模块</h3>
+<pre><code>auxiliary/gather/enum_dns #Perform enumeration actions
+</code></pre>
+<h3 id="nmap">使用nmap 脚本</h3>
+<pre><code>#执行枚举操作
+nmap -n --script &quot;(default and *dns*) or fcrdns or dns-srv-enum or dns-random-txid or dns-random-srcport&quot; &lt;IP&gt;
+</code></pre>
+<h3 id="dns_1">DNS 反向暴力破解</h3>
+<pre><code>dnsrecon -r 127.0.0.0/24 -n &lt;IP_DNS&gt;  #所有地址的 DNS 反向查询
+dnsrecon -r 127.0.1.0/24 -n &lt;IP_DNS&gt;  #所有地址的 DNS 反向查询
+dnsrecon -r &lt;IP_DNS&gt;/24 -n &lt;IP_DNS&gt;   #所有地址的 DNS 反向查询
+dnsrecon -d active.htb -a -n &lt;IP_DNS&gt; #区域转移
+</code></pre>
+<p>如果您能够找到解析为内部 IP 地址的子域，您应该尝试对请求该 IP 范围的域的 NS 执行反向 dns BF。</p>
+<p>可以使用: https://github.com/amine7536/reverse-scan</p>
+<p>可以查询反向 IP  https://bgp.he.net/net/205.166.76.0/24#_dns (此工具对 BGP 也很有帮助).</p>
+<h3 id="dns-">DNS - 子域名暴力破解</h3>
+<pre><code>dnsenum --dnsserver &lt;IP_DNS&gt; --enum -p 0 -s 0 -o subdomains.txt -f subdomains-1000.txt &lt;DOMAIN&gt;
+dnsrecon -D subdomains-1000.txt -d &lt;DOMAIN&gt; -n &lt;IP_DNS&gt;
+dnscan -d &lt;domain&gt; -r -w subdomains-1000.txt #以递归方式暴力猜测子域名, https://github.com/rbsec/dnscan
+</code></pre>
+<h3 id="_6">活动目录服务器</h3>
+<pre><code>dig -t _gc._tcp.lab.domain.com
+dig -t _ldap._tcp.lab.domain.com
+dig -t _kerberos._tcp.lab.domain.com
+dig -t _kpasswd._tcp.lab.domain.com
+nmap --script dns-srv-enum --script-args &quot;dns-srv-enum.domain='domain.com'&quot;
+</code></pre>
+<h3 id="dns_2">DNS安全</h3>
+<pre><code> #查询 paypal 子域名到 ns3.isc-sns.info
+ nmap -sSU -p53 --script dns-nsec-enum --script-args dns-nsec-enum.domains=paypal.com ns3.isc-sns.info
+</code></pre>
+<h3 id="ipv6">IPv6</h3>
+<p>使用 “AAAA” 请求暴力猜测子域名的 IPv6 地址</p>
+<pre><code>dnsdict6 -s -t &lt;domain&gt;
+</code></pre>
+<p>使用 IPv6 地址暴力猜测反向 DNS</p>
+<pre><code>dnsrevenum6 pri.authdns.ripe.net 2001:67c:2e8::/48 #Will use the dns pri.authdns.ripe.net
+</code></pre>
+<h3 id="dns-ddos">DNS 递归 DDoS 攻击</h3>
+<p>如果<strong>启用 DNS 递归</strong>，攻击者可以<strong>欺骗UDP 数据包</strong><strong>的来源</strong>，以便使<strong>DNS 将响应发送到受害服务器</strong>。攻击者可以滥用<strong>ANY</strong>或<strong>DNSSEC</strong>记录类型，因为它们过去常常有更大的响应。<strong>检查</strong>DNS 是否支持<strong>递归的</strong>
+方法是查询域名并<strong>检查</strong><strong>标志“ra”</strong>（<em>递归可用</em>）是否在响应中：</p>
+<pre><code>dig google.com A @&lt;IP&gt;
+</code></pre>
+<p><strong>不可用</strong>:</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (275).png"><img alt="img" src="../assets/image%20%28275%29.png" /></a></p>
+<p><strong>可用</strong>:</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (276).png"><img alt="img" src="../assets/image%20%28276%29.png" /></a></p>
+<h3 id="_7">邮寄到不存在的帐户</h3>
+<p>出自书籍：网络安全评估（第 3 版）</p>
+<p>简单地向目标域中不存在的地址发送电子邮件通常会通过<em>未送达通知</em>(NDN) 揭示有用的内部网络信息。</p>
+<pre><code>Generating server: noa.nintendo.com
+
+blah@nintendo.com
+#550 5.1.1 RESOLVER.ADR.RecipNotFound; not found ##
+
+Original message headers:
+
+Received: from ONERDEDGE02.one.nintendo.com (10.13.20.35) by
+ onerdexch08.one.nintendo.com (10.13.30.39) with Microsoft SMTP Server (TLS)
+ id 14.3.174.1; Sat, 26 Apr 2014 16:52:22 -0700
+Received: from barracuda.noa.nintendo.com (205.166.76.35) by
+ ONERDEDGE02.one.nintendo.com (10.13.20.35) with Microsoft SMTP Server (TLS)
+ id 14.3.174.1; Sat, 26 Apr 2014 16:51:22 -0700
+X-ASG-Debug-ID: 1398556333-0614671716199b0d0001-zOQ9WJ
+Received: from gateway05.websitewelcome.com (gateway05.websitewelcome.com  [69.93.154.37]) by 
+barracuda.noa.nintendo.com with ESMTP id xVNPkwaqGgdyH5Ag for &lt;blah@nintendo.com&gt;; Sat, 
+26 Apr 2014 16:52:13 -0700 (PDT)
+X-Barracuda-Envelope-From: chris@example.org
+X-Barracuda-Apparent-Source-IP: 69.93.154.37
+</code></pre>
+<p>以下这段文字中的数据是有用的：</p>
+<ul>
+<li>内部主机名、IP 地址和子域布局</li>
+<li>邮件服务器正在运行 Microsoft Exchange Server 2010 SP3</li>
+<li>梭子鱼网络设备用于执行内容过滤</li>
+</ul>
+<h2 id="_8">配置文件</h2>
+<pre><code>host.conf
+/etc/resolv.conf
+/etc/bind/named.conf
+/etc/bind/named.conf.local
+/etc/bind/named.conf.options
+/etc/bind/named.conf.log
+/etc/bind/*
+</code></pre>
+<p>配置绑定服务器时的危险设置：</p>
+<table>
+<thead>
+<tr>
+<th><strong>选项</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>allow-query</code></td>
+<td>定义允许哪些主机向 DNS 服务器发送请求。</td>
+</tr>
+<tr>
+<td><code>allow-recursion</code></td>
+<td>定义允许哪些主机向 DNS 服务器发送递归请求。</td>
+</tr>
+<tr>
+<td><code>allow-transfer</code></td>
+<td>定义允许哪些主机从 DNS 服务器接收区域传输。</td>
+</tr>
+<tr>
+<td><code>zone-statistics</code></td>
+<td>收集区域的统计数据。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_9">自动化命令</h2>
+<pre><code>Protocol_Name: DNS    #协议的缩写（如果有的话）。
+Port_Number:  53     #如果有多个，用逗号隔开
+Protocol_Description: Domain Name Service        #协议的缩写拼写出来
+
+Entry_1:
+  Name: Notes
+  Description: Notes for DNS
+  Note: |
+    #These are the commands I run every time I see an open DNS port
+
+    dnsrecon -r 127.0.0.0/24 -n {IP} -d {Domain_Name}
+    dnsrecon -r 127.0.1.0/24 -n {IP} -d {Domain_Name}
+    dnsrecon -r {Network}{CIDR} -n {IP} -d {Domain_Name}
+    dig axfr @{IP}
+    dig axfr {Domain_Name} @{IP}
+    nslookup
+        SERVER {IP}
+        127.0.0.1
+        {IP}
+        Domain_Name
+        exit
+
+
+Entry_2:
+  Name: Banner Grab
+  Description: Grab DNS Banner
+  Command: dig version.bind CHAOS TXT @DNS
+
+Entry_3:
+  Name: Nmap Vuln Scan
+  Description: Scan for Vulnerabilities with Nmap
+  Command: nmap -n --script &quot;(default and *dns*) or fcrdns or dns-srv-enum or dns-random-txid or dns-random-srcport&quot; {IP}
+
+Entry_4:
+  Name: Zone Transfer
+  Description: Three attempts at forcing a zone transfer
+  Command: dig axfr @{IP} &amp;&amp; dix axfr @{IP} {Domain_Name} &amp;&amp; fierce -dns {Domain_Name}
+
+Entry_5:
+  Name: Active Directory
+  Description: Eunuerate a DC via DNS
+  Command: dig -t _gc._{Domain_Name} &amp;&amp; dig -t _ldap._{Domain_Name} &amp;&amp; dig -t _kerberos._{Domain_Name} &amp;&amp; dig -t _kpasswd._{Domain_Name} &amp;&amp; nmap --script dns-srv-enum --script-args &quot;dns-srv-enum.domain={Domain_Name}&quot;
+
+Entry_6:
+  Name: consolesless mfs enumeration
+  Description: DNS enumeration without the need to run msfconsole
+  Note: sourced from https://github.com/carlospolop/legion
+  Command: msfconsole -q -x 'use auxiliary/scanner/dns/dns_amp; set RHOSTS {IP}; set RPORT 53; run; exit' &amp;&amp; msfconsole -q -x 'use auxiliary/gather/enum_dns; set RHOSTS {IP}; set RPORT 53; run; exit' 
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../69-udp-tftp%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../69-udp-tftp%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        69 - udp/tftp渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../49-TACACS%2B%E6%B8%97%E9%80%8F/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../49-TACACS%2B%E6%B8%97%E9%80%8F/" class="btn btn-xs btn-link">
+        49 - TACACS 渗透
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

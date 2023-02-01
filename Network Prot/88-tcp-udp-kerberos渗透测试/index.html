@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://nosafe.wiki/Network%20Prot/88-tcp-udp-kerberos%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>88 - tcp/udp-kerberos渗透测试 - No Safe - 明摆暗卷</title>
+    <link href="../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\u57fa\u672c\u4fe1\u606f", url: "#_top", children: [
+          ]},
+          {title: "\u66f4\u591a", url: "#_2", children: [
+              {title: "\u4ece Windows \u83b7\u53d6\u7968\u636e", url: "#windows" },
+              {title: "\u4ece Linux \u83b7\u53d6\u7968\u636e", url: "#linux" },
+              {title: "Shodan", url: "#shodan" },
+              {title: "MS14-068", url: "#ms14-068" },
+          ]},
+          {title: "\u81ea\u52a8\u5316\u547d\u4ee4", url: "#_3", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../js/base.js"></script>
+      <script src="../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../110%2C995%20-%20POP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../110%2C995%20-%20POP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        110,995 - POP渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../79%20-%20Finger%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../79%20-%20Finger%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        79 - Finger 渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h2 id="_1">基本信息</h2>
+<p>首先，Kerberos 是一种认证协议，而不是授权协议。换句话说，它允许识别每个提供密码的用户，但不会验证用户对哪些资源或服务具有访问权限。</p>
+<p>Kerberos 在 Active Directory 中使用。在这个平台中，Kerberos 提供每个用户的权限信息，但是确定用户是否具有访问其资源的责任在于每个服务。</p>
+<p><strong>默认端口:</strong> 88/tcp/udp</p>
+<pre><code>PORT   STATE SERVICE
+88/tcp open  kerberos-sec
+</code></pre>
+<h2 id="_2">更多</h2>
+<h3 id="windows">从 Windows 获取票据</h3>
+<p>在 Windows 中，票证由负责安全性的<strong>lsass（本地安全机构子系统服务）进程处理和存储。</strong>因此，要从 Windows 系统检索票证，有必要<strong>与 lsass 通信并请求它们</strong>。作为<strong>非管理员用户只能获取拥有的票</strong>，但是作为机器<strong>管理员</strong>，可以获取<strong>所有票。</strong>为此，可以使用<strong>Mimikatz 或 Rubeus工具</strong>，如下所示：</p>
+<pre><code># Using mimikatz
+sekurlsa::tickets /export
+# Using Rubeus
+## Dump all tickets
+.\Rubeus dump
+[IO.File]::WriteAllBytes(&quot;ticket.kirbi&quot;, [Convert]::FromBase64String(&quot;&lt;BASE64_TICKET&gt;&quot;))
+
+## List all tickets
+.\Rubeus.exe triage
+## Dump the interesting one by luid
+.\Rubeus.exe dump /service:krbtgt /luid:&lt;luid&gt; /nowrap
+[IO.File]::WriteAllBytes(&quot;ticket.kirbi&quot;, [Convert]::FromBase64String(&quot;&lt;BASE64_TICKET&gt;&quot;))
+</code></pre>
+<h3 id="linux">从 Linux 获取票据</h3>
+<p>在 Linux 系统中，票据储存在凭据缓存（credential caches）或 ccaches 中。凭据缓存是一种存储身份验证信息的数据结构，用于在 Linux 系统上储存和管理票据。它有 3 种主要类型，这些类型表示票据可以在哪里找到：</p>
+<ul>
+<li>FILE：表示票据储存在本地文件系统中，可以通过文件路径访问。</li>
+<li>KEYRING：表示票据储存在内核的秘钥环（keyring）中，可以通过内核接口访问。</li>
+<li>MEMORY：表示票据储存在内存中，只能通过当前进程访问。</li>
+</ul>
+<p>因此，在 Linux 系统中，票据储存在凭据缓存或 ccaches 中，有 3 种主要类型，指示票据可以在哪里找到。</p>
+<p>为了检查某台特定机器使用的存储类型，必须在 <strong>/etc/krb5.conf</strong> 文件中检查 <strong>default_ccache_name</strong> 变量。该文件默认情况下对任何用户都有读权限。如果这个参数丢失了，它的默认值是 <em>FILE:/tmp/krb5cc_%{uid}</em>。</p>
+<p>为了<strong>从其他 2 个来源</strong>（密钥环和进程）中提取票证，2017 年发布的一篇很棒的论文<a href="https://www.delaat.net/rp/2016-2017/p97/report.pdf"><strong>Kerberos Credential Thievery (GNU/Linux)</strong></a>解释了从中恢复票证的方法。</p>
+<h4 id="-paper">秘钥环 - 来自 paper</h4>
+<blockquote>
+<p>Linux 内核具有一个名为 keyrings 的功能。这是一个驻留在内核中的内存区域，用于管理和保留密钥。</p>
+<p>keyctl 系统调用在内核版本 2.6.10 5 中引入。它为用户空间应用程序提供了一个 API，可以用它来与内核 keyrings 交互。</p>
+<p>内核 keyring 的名称可以从 Kerberos 配置文件 /etc/krb5.conf 解析，该文件默认对任何人都具有读权限（八进制 644）。然后，攻击者可以利用这些信息搜索包含 keyring 的票据 11，并提取票据。实现此功能的概念验证脚本可以在 A.2 节（hercules.sh）中看到。在 keyring 中，ccache 被存储为组件。如图 2 所示，文件 ccache 由 3 个独特的组件组成：标头、默认主体和一系列凭据。keyring 保存默认主体和凭据。该脚本将这些组件转储到单独的文件。然后，使用攻击者合成的标头，这些部分按正确的顺序合并成一个重建文件 ccache。重建的文件可以推出到攻击者机器，然后用来模拟 Kerberos 用户。用于生成有效 ccache 标头的简单程序可以在 A.3 节中看到。</p>
+</blockquote>
+<p>基于<strong>heracles.sh 脚本</strong>（来自论文），您可以使用的 C 工具（由完整帖子的作者创建）是<a href="https://github.com/TarlogicSecurity/tickey"><strong>tikey</strong></a><strong>，它从密钥环中提取门票：</strong></p>
+<pre><code>/tmp/tickey -i
+</code></pre>
+<h3 id="shodan">Shodan</h3>
+<ul>
+<li><code>port:88 kerberos</code></li>
+</ul>
+<h3 id="ms14-068">MS14-068</h3>
+<p>简单来说，这个漏洞使攻击者能够通过添加一个错误声明（即用户是 Domain Admins 组（或其他敏感组）的成员）来修改现有的有效的域用户登录令牌（Kerberos Ticket Granting Ticket，TGT 票据），域控制器（DC）将验证该声明，从而使攻击者不当地访问网络上 AD 森林中任何域的资源。</p>
+<p>其他漏洞: https://github.com/SecWiki/windows-kernel-exploits/tree/master/MS14-068/pykek</p>
+<h2 id="_3">自动化命令</h2>
+<pre><code class="language-bash">Protocol_Name: Kerberos    #如果有的话，协议缩写。
+Port_Number:  88   #如果有多个，通过逗号分隔。
+Protocol_Description: AD Domain Authentication         #拼写出协议缩写
+
+Entry_1:
+  Name: Notes
+  Description: Notes for Kerberos
+  Note: |
+    Firstly, Kerberos is an authentication protocol, not authorization. In other words, it allows to identify each user, who provides a secret password, however, it does not validates to which resources or services can this user access.
+    Kerberos is used in Active Directory. In this platform, Kerberos provides information about the privileges of each user, but it is the responsability of each service to determine if the user has access to its resources.
+
+    https://book.hacktricks.xyz/pentesting/pentesting-kerberos-88
+
+Entry_2:
+  Name: Pre-Creds
+  Description: Brute Force to get Usernames
+  Command: nmap -p 88 --script=krb5-enum-users --script-args krb5-enum-users.realm=&quot;{Domain_Name}&quot;,userdb={Big_Userlist} {IP}
+
+Entry_3:
+  Name: With Usernames
+  Description: Brute Force with Usernames and Passwords
+  Note: consider git clonehttps://github.com/ropnop/kerbrute.git ./kerbrute -h
+
+Entry_4:
+  Name: With Creds
+  Description: Attempt to get a list of user service principal names
+  Command: GetUserSPNs.py -request -dc-ip {IP} active.htb/svc_tgs
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../110%2C995%20-%20POP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../110%2C995%20-%20POP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        110,995 - POP渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../79%20-%20Finger%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../79%20-%20Finger%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        79 - Finger 渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

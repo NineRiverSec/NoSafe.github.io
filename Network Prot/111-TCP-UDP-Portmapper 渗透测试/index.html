@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://nosafe.wiki/Network%20Prot/111-TCP-UDP-Portmapper%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>111 - TCP/UDP Portmapper 渗透测试 - No Safe - 明摆暗卷</title>
+    <link href="../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\u57fa\u672c\u4fe1\u606f", url: "#_top", children: [
+          ]},
+          {title: "\u679a\u4e3e", url: "#_2", children: [
+              {title: "Shodan", url: "#shodan" },
+          ]},
+          {title: "RPCBind + NFS", url: "#rpcbind-nfs", children: [
+          ]},
+          {title: "NIS", url: "#nis", children: [
+          ]},
+          {title: "RPC Users", url: "#rpc-users", children: [
+          ]},
+          {title: "Bypass \u8fc7\u6ee4\u7684 Portmapper \u7aef\u53e3", url: "#bypass-portmapper", children: [
+          ]},
+          {title: "Shodan", url: "#shodan_1", children: [
+          ]},
+          {title: "\u81ea\u52a8\u5316\u547d\u4ee4", url: "#_3", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../js/base.js"></script>
+      <script src="../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../Web%20Pentesting/Readme/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../Web%20Pentesting/Readme/" class="btn btn-xs btn-link">
+        Readme
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../110%2C995%20-%20POP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../110%2C995%20-%20POP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        110,995 - POP渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h2 id="_1">基本信息</h2>
+<p>提供基于Unix的系统之间的信息。端口经常被探测，它可以用来识别Nix OS，并获取有关可用服务的信息。用于NFS、NIS或任何基于rpc的服务的端口。</p>
+<p><strong>默认端口:</strong> 111/TCP/UDP, Oracle Solaris 中为 32771</p>
+<pre><code>PORT    STATE SERVICE
+111/tcp open  rpcbind
+</code></pre>
+<h2 id="_2">枚举</h2>
+<pre><code class="language-bash">rpcinfo irked.htb
+nmap -sSUC -p111 192.168.10.1
+</code></pre>
+<p>有时它不会给你任何信息，在某些情况下你会得到这样的信息：</p>
+<p><img alt="img" src="../assets/image%20%28230%29.png" /></p>
+<h3 id="shodan">Shodan</h3>
+<ul>
+<li><code>port:111 portmap</code></li>
+</ul>
+<h2 id="rpcbind-nfs">RPCBind + NFS</h2>
+<p>如果您找到 NFS 服务，那么您可能能够进行列出和下载（并可能上传）文件：</p>
+<p><img alt="img" src="../assets/image%20%28232%29.png" /></p>
+<h2 id="nis">NIS</h2>
+<p>如果您发现服务<code>ypbind</code>正在运行：</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (233).png"><img alt="img" src="../assets/image%20%28233%29.png" /></a></p>
+<p>您可以尝试利用它。无论如何，首先您<strong>需要猜测机器的 NIS“域名”</strong>（当安装 NIS 时它配置了一个“域名”），<strong>如果不知道这个域名您将无能为力</strong>。</p>
+<p>获取环境的 NIS 域名（本例中为 example.org）后，使用 ypwhich 命令 ping NIS 服务器和 ypcat 以获取敏感材料。您应该将加密的密码哈希输入 John the Ripper，一旦破解，您就可以使用它来评估系统访问和特权。</p>
+<pre><code class="language-sh">root@kali:~# apt-get install nis
+root@kali:~# ypwhich -d example.org 192.168.10.1
+potatohead.example.org
+root@kali:~# ypcat –d example.org –h 192.168.10.1 passwd.byname
+tiff:noR7Bk6FdgcZg:218:101::/export/home/tiff:/bin/bash 
+katykat:d.K5tGUWCJfQM:2099:102::/export/home/katykat:/bin/bash 
+james:i0na7pfgtxi42:332:100::/export/home/james:/bin/tcsh 
+florent:nUNzkxYF0Hbmk:199:100::/export/home/florent:/bin/csh 
+dave:pzg1026SzQlwc:182:100::/export/home/dave:/bin/bash 
+yumi:ZEadZ3ZaW4v9.:1377:160::/export/home/yumi:/bin/bash
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>主文件</th>
+<th><strong>Map(s)</strong></th>
+<th><strong>笔记</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/etc/hosts</td>
+<td>hosts.byname, hosts.byaddr</td>
+<td>包含主机名和 IP 详细信息</td>
+</tr>
+<tr>
+<td>/etc/passwd</td>
+<td>passwd.byname, passwd.byuid</td>
+<td>NIS 用户密码文件</td>
+</tr>
+<tr>
+<td>/etc/group</td>
+<td>group.byname, group.bygid</td>
+<td>NIS组文件</td>
+</tr>
+<tr>
+<td>/usr/lib/aliases</td>
+<td>mail.aliases</td>
+<td>详细邮件别名</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rpc-users">RPC Users</h2>
+<p>如果您发现这样列出的<strong>rusersd</strong>服务：</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (231).png"><img alt="img" src="../assets/image%20%28231%29.png" /></a></p>
+<p>您可以枚举盒子的用户。要了解如何阅读[1026-渗透测试 Rsusersd]。</p>
+<h2 id="bypass-portmapper">Bypass 过滤的 Portmapper 端口</h2>
+<p>如果在 nmap 扫描期间您看到 NFS 等开放端口，但端口 111 被过滤，您将无法利用这些端口。
+但是，如果您可以在本地模拟一个端口映射器服务，并将 NFS 端口从您的机器传输到受害者机器，您将能够使用常规工具来利用这些服务。https://medium.com/@sebnemK/how-to-bypass-filtered-portmapper-port-111-27cee52416bc
+中的更多信息</p>
+<h2 id="shodan_1">Shodan</h2>
+<ul>
+<li><code>Portmap</code></li>
+</ul>
+<h2 id="_3">自动化命令</h2>
+<pre><code class="language-bash">Protocol_Name: Portmapper    #Protocol Abbreviation if there is one.
+Port_Number:  43     #Comma separated if there is more than one.
+Protocol_Description: PM or RPCBind        #Protocol Abbreviation Spelled out
+
+Entry_1:
+  Name: Notes
+  Description: Notes for PortMapper
+  Note: |
+    提供基于Unix的系统之间的信息。端口经常被探测，它可以用来识别Nix OS，并获取有关可用服务的信息。用于NFS、NIS或任何基于rpc的服务的端口。
+
+
+Entry_2:
+  Name: rpc info
+  Description: May give netstat-type info
+  Command: whois -h {IP} -p 43 {Domain_Name} &amp;&amp; echo {Domain_Name} | nc -vn {IP} 43
+
+Entry_3:
+  Name: nmap
+  Description: May give netstat-type info
+  Command: nmap -sSUC -p 111 {IP}
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../../Web%20Pentesting/Readme/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../../Web%20Pentesting/Readme/" class="btn btn-xs btn-link">
+        Readme
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../110%2C995%20-%20POP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../110%2C995%20-%20POP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        110,995 - POP渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://nosafe.wiki/Network%20Prot/7-tcp-udp%20-%20ECHO%E6%B8%97%E9%80%8F/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>7 tcp/udp - ECHO渗透 - No Safe - 明摆暗卷</title>
+    <link href="../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\u57fa\u672c\u4fe1\u606f", url: "#_top", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../js/base.js"></script>
+      <script src="../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../21%20-%20FTP%E6%B8%97%E9%80%8F/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../21%20-%20FTP%E6%B8%97%E9%80%8F/" class="btn btn-xs btn-link">
+        21 - FTP渗透
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../Readme/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../Readme/" class="btn btn-xs btn-link">
+        Readme
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <ul>
+<li>
+<h2 id="_1">基本信息</h2>
+</li>
+</ul>
+<p>该主机上正在运行一个echo服务。echo服务用于测试和测量目的，可以监听TCP和UDP协议。服务器发送回它接收到的任何数据，不做任何修改。</p>
+<p><strong>通过将回声服务连接到同一台或另一台机器上的回声服务，可能会导致拒绝服务</strong>。由于产生的数据包数量过高，受影响的机器可能会有效地停止服务。</p>
+<p>参考 https://www.acunetix.com/vulnerabilities/web/echo-service-running/</p>
+<p><strong>默认端口:</strong> 7/tcp/udp</p>
+<p><code>PORT   STATE SERVICE
+  7/udp  open  echo
+  7/tcp  open  echo</code></p>
+<p>## 访问 Echo 服务(UDP)</p>
+<p><code>nc -uvn &lt;IP&gt; 7
+  Hello echo    #This is wat you send
+  Hello echo    #This is the response</code></p>
+<p>## Shodan</p>
+<ul>
+<li><code>port:7 echo</code></li>
+</ul>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../21%20-%20FTP%E6%B8%97%E9%80%8F/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../21%20-%20FTP%E6%B8%97%E9%80%8F/" class="btn btn-xs btn-link">
+        21 - FTP渗透
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../Readme/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../Readme/" class="btn btn-xs btn-link">
+        Readme
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

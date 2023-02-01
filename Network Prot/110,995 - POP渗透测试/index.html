@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://nosafe.wiki/Network%20Prot/110%2C995%20-%20POP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>110,995 - POP渗透测试 - No Safe - 明摆暗卷</title>
+    <link href="../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\u57fa\u672c\u4fe1\u606f", url: "#_top", children: [
+          ]},
+          {title: "\u679a\u4e3e", url: "#_2", children: [
+              {title: "Banner \u6293\u53d6", url: "#banner" },
+          ]},
+          {title: "\u624b\u52a8", url: "#_3", children: [
+          ]},
+          {title: "Automated", url: "#automated", children: [
+              {title: "POP3 \u66b4\u529b\u7834\u89e3", url: "#pop3" },
+          ]},
+          {title: "POP \u8bed\u6cd5", url: "#pop", children: [
+          ]},
+          {title: "\u5371\u9669\u8bbe\u7f6e", url: "#_4", children: [
+          ]},
+          {title: "\u81ea\u52a8\u5316\u547d\u4ee4", url: "#_5", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../js/base.js"></script>
+      <script src="../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../111-TCP-UDP-Portmapper%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../111-TCP-UDP-Portmapper%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        111 - TCP/UDP Portmapper 渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../88-tcp-udp-kerberos%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../88-tcp-udp-kerberos%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        88 - tcp/udp-kerberos渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h2 id="_1">基本信息</h2>
+<p><strong>邮局协议</strong>( <strong>POP</strong> ) 是一种计算机网络和 Internet 标准<strong>协议</strong>，它从远程邮件服务器提取和检索电子邮件以供主机访问。<strong>POP</strong>是 OSI 模型中的应用层<strong>协议</strong>，它为最终用户提供获取和接收电子邮件的能力（来自<a href="https://www.techopedia.com/definition/5383/post-office-protocol-pop">此处</a>）。</p>
+<p>POP 客户端通常会连接、检索所有消息、将它们存储在客户端系统上并从服务器上删除它们。POP 有 3 个版本，但 POP3 是使用最多的一个。</p>
+<p><strong>默认端口:</strong> 110, 995(ssl)</p>
+<pre><code>PORT    STATE SERVICE
+110/tcp open  pop3
+</code></pre>
+<h2 id="_2">枚举</h2>
+<h3 id="banner">Banner 抓取</h3>
+<pre><code>nc -nv &lt;IP&gt; 110
+openssl s_client -connect &lt;IP&gt;:995 -crlf -quiet
+</code></pre>
+<h2 id="_3">手动</h2>
+<p>可以使用该命令<code>CAPA</code>获取 POP3 服务器的能力。</p>
+<h2 id="automated">Automated</h2>
+<pre><code>nmap --script &quot;pop3-capabilities or pop3-ntlm-info&quot; -sV -port &lt;PORT&gt; &lt;IP&gt; #All are default scripts
+</code></pre>
+<p>该<code>pop3-ntlm-info</code>插件将返回一些“<strong>敏感</strong>”数据（Windows 版本）。</p>
+<h3 id="pop3"><a href="https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/brute-force.md#pop">POP3 暴力破解</a></h3>
+<h2 id="pop">POP 语法</h2>
+<pre><code>POP commands:
+  USER uid           Log in as &quot;uid&quot;
+  PASS password      Substitue &quot;password&quot; for your actual password
+  STAT               List number of messages, total mailbox size
+  LIST               List messages and sizes
+  RETR n             Show message n
+  DELE n             Mark message n for deletion
+  RSET               Undo any changes
+  QUIT               Logout (expunges messages if no RSET)
+  TOP msg n          Show first n lines of message number msg
+  CAPA               Get capabilities
+</code></pre>
+<p>访问 <a href="http://sunnyoasis.com/services/emailviatelnet.html">这里</a></p>
+<p>例子:</p>
+<pre><code>root@kali:~# telnet $ip 110
+ +OK beta POP3 server (JAMES POP3 Server 2.3.2) ready 
+ USER billydean    
+ +OK
+ PASS password
+ +OK Welcome billydean
+
+ list
+
+ +OK 2 1807
+ 1 786
+ 2 1021
+
+ retr 1
+
+ +OK Message follows
+ From: jamesbrown@motown.com
+ Dear Billy Dean,
+
+ Here is your login for remote desktop ... try not to forget it this time!
+ username: billydean
+ password: PA$$W0RD!Z
+</code></pre>
+<h2 id="_4">危险设置</h2>
+<p>来自 https://academy.hackthebox.com/module/112/section/1073</p>
+<table>
+<thead>
+<tr>
+<th><strong>环境</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auth_debug</code></td>
+<td>启用所有身份验证调试日志记录。</td>
+</tr>
+<tr>
+<td><code>auth_debug_passwords</code></td>
+<td>此设置调整日志详细程度、提交的密码和记录方案。</td>
+</tr>
+<tr>
+<td><code>auth_verbose</code></td>
+<td>记录不成功的身份验证尝试及其原因。</td>
+</tr>
+<tr>
+<td><code>auth_verbose_passwords</code></td>
+<td>用于身份验证的密码会被记录下来，也可以被截断。</td>
+</tr>
+<tr>
+<td><code>auth_anonymous_username</code></td>
+<td>这指定使用匿名 SASL 机制登录时要使用的用户名。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">自动化命令</h2>
+<pre><code class="language-bash">Protocol_Name:  POP   
+Port_Number:  110    
+Protocol_Description: Post Office Protocol         
+
+Entry_1:
+  Name: Notes
+  Description: Notes for POP
+  Note: |
+    Post Office Protocol (POP) 是一种电脑网络和互联网标准协议，它可以从远程邮件服务器提取并检索电子邮件，供主机计算机使用。POP 是 OSI 模型中的应用层协议，为最终用户提供提取和接收电子邮件的能力。POP 有三个版本，但 POP3 是最常用的版本。
+
+
+Entry_2:
+  Name: Banner Grab
+  Description: Banner Grab 110
+  Command: nc -nv {IP} 110
+
+Entry_3:
+  Name: Banner Grab 995
+  Description: Grab Banner Secure
+  Command: openssl s_client -connect {IP}:995 -crlf -quiet
+
+Entry_4:
+  Name: Nmap
+  Description: Scan for POP info
+  Command: nmap --script &quot;pop3-capabilities or pop3-ntlm-info&quot; -sV -p 110 {IP}
+
+Entry_5:
+  Name: Hydra Brute Force
+  Description: Need User
+  Command: hydra -l {Username} -P {Big_Passwordlist} -f {IP} pop3 -V
+
+Entry_6:
+  Name: consolesless mfs enumeration
+  Description: POP3 enumeration without the need to run msfconsole
+  Note: sourced from https://github.com/carlospolop/legion
+  Command: msfconsole -q -x 'use auxiliary/scanner/pop3/pop3_version; set RHOSTS {IP}; set RPORT 110; run; exit' 
+
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../111-TCP-UDP-Portmapper%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../111-TCP-UDP-Portmapper%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        111 - TCP/UDP Portmapper 渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../88-tcp-udp-kerberos%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../88-tcp-udp-kerberos%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        88 - tcp/udp-kerberos渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

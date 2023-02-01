@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://nosafe.wiki/Network%20Prot/49-TACACS%2B%E6%B8%97%E9%80%8F/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>49 - TACACS 渗透 - No Safe - 明摆暗卷</title>
+    <link href="../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\u57fa\u672c\u4fe1\u606f", url: "#_top", children: [
+          ]},
+          {title: "\u62e6\u622a\u8ba4\u8bc1\u5bc6\u94a5", url: "#_2", children: [
+              {title: "\u4e2d\u95f4\u4eba\u653b\u51fb", url: "#_3" },
+              {title: "\u66b4\u529b\u7834\u89e3\u5bc6\u94a5", url: "#_4" },
+              {title: "\u89e3\u5bc6\u6d41\u91cf", url: "#_5" },
+          ]},
+          {title: "\u53c2\u8003", url: "#_6", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../js/base.js"></script>
+      <script src="../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../53%20-%20DNS%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../53%20-%20DNS%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        53 - DNS 渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../43%20-%20%20WHOIS%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../43%20-%20%20WHOIS%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        43 - WHOIS渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h2 id="_1">基本信息</h2>
+<p>Terminal Access Controller Access Control System (TACACS) 是一种安全协议，可以提供用户尝试访问路由器或 NAS 的中央验证。TACACS+ 是 TACACS 协议的更新版本，提供单独的身份验证、授权和记帐（AAA）服务。</p>
+<pre><code>PORT   STATE  SERVICE
+49/tcp open   tacacs
+</code></pre>
+<p><strong>默认端口:</strong> 49</p>
+<h2 id="_2">拦截认证密钥</h2>
+<p>如果攻击者设法进入客户端和 TACACS 服务器之间，<strong>他可以拦截加密形式的身份验证密钥</strong>，然后对其进行本地暴力破解。所以你们都暴力破解了密钥，并且没有出现在日志中。如果您设法暴力破解密钥，<strong>您将能够访问网络设备并解密</strong><strong>Wireshark</strong>中的流量。</p>
+<h3 id="_3">中间人攻击</h3>
+<p>为了执行中间人攻击，您可以使用以下方法： <a href="https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/pentesting-network/#arp-spoofing"><strong>ARP spoofing attack</strong></a>.</p>
+<h3 id="_4">暴力破解密钥</h3>
+<p>现在您需要运行<a href="https://c0decafe.de/svn/codename_loki/trunk/">Loki</a>。这是一个专门用于分析 L2/L3 协议安全性的工具。<strong>它的能力与流行的耶尔森氏菌</strong>一样好，是它的有力竞争者。Loki 还可以暴力破解 TACACS 密钥。如果密钥被成功<strong>暴力破解</strong>（<strong>通常是 MD5 加密格式）</strong>，<strong>我们就可以访问设备并解密 TACACS 加密的流量。</strong></p>
+<pre><code>sudo loki_gtk.py
+</code></pre>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (31).png"><img alt="img" src="../assets/image%20%2831%29.png" /></a></p>
+<p>您还需要指定字典的路径以暴力破解加密密钥。请务必取消选中<strong>使用暴力破解</strong>选项，否则 Loki 将在不使用字典的情况下暴力破解密码。</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (11).png"><img alt="img" src="../assets/image%20%2811%29.png" /></a></p>
+<p>现在我们必须等待管理员通过 TACACS 服务器登录设备。假设网络管理员已经登录，我们<strong>通过 ARP 欺骗站在中间</strong>，拦截流量。这样做时，合法主机不会意识到其他人干扰了他们的连接。</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (8).png"><img alt="img" src="../assets/image%20%288%29.png" /></a></p>
+<p>现在点击<strong>CRACK</strong>按钮，等待<strong>Loki</strong>破解密码。</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (17).png"><img alt="img" src="../assets/image%20%2817%29.png" /></a></p>
+<h3 id="_5">解密流量</h3>
+<p>我们成功解锁了密钥，现在我们需要解密 TACACS 流量。正如我所说，如果存在密钥，Wireshark 可以处理加密的 TACACS 流量。</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (28).png"><img alt="img" src="../assets/image%20%2828%29.png" /></a></p>
+<p>我们看到使用了哪个横幅。</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (24).png"><img alt="img" src="../assets/image%20%2824%29.png" /></a></p>
+<p>我们找到用户的用户名<code>admin</code></p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (7).png"><img alt="img" src="../assets/image%20%287%29.png" /></a></p>
+<p>因此，<strong>我们拥有<code>admin:secret1234</code></strong>可用于访问硬件本身的<strong>凭据。</strong>检查它们的有效性。**</p>
+<p><a href="https://github.com/carlospolop/hacktricks/blob/master/.gitbook/assets/image (19).png"><img alt="img" src="../assets/image%20%2819%29.png" /></a></p>
+<p>这就是你如何攻击 TACACS+ 并<strong>获得</strong>对网络设备控制面板的访问权限。</p>
+<h2 id="_6">参考</h2>
+<ul>
+<li>拦截关键部分复制自https://medium.com/@in9uz/cisco-nightmare-pentesting-cisco-networks-like-a-devil-f4032eb437b9</li>
+</ul>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../53%20-%20DNS%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../53%20-%20DNS%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        53 - DNS 渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../43%20-%20%20WHOIS%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../43%20-%20%20WHOIS%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        43 - WHOIS渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>

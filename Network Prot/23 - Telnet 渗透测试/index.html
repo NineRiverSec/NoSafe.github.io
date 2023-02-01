@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://nosafe.wiki/Network%20Prot/23%20-%20Telnet%20%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>23 - Telnet 渗透测试 - No Safe - 明摆暗卷</title>
+    <link href="../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\u57fa\u672c\u4fe1\u606f", url: "#_top", children: [
+          ]},
+          {title: "\u679a\u4e3e", url: "#_2", children: [
+              {title: "Banner \u6293\u53d6", url: "#banner" },
+          ]},
+          {title: "\u914d\u7f6e\u6587\u4ef6", url: "#_3", children: [
+          ]},
+          {title: "\u81ea\u52a8\u5316\u547d\u4ee4", url: "#_4", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../js/base.js"></script>
+      <script src="../../search/main.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../25%2C465%2C587%20-%20SMTPs%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../25%2C465%2C587%20-%20SMTPs%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        25,465,587 - SMTPs渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../22%20-%20SSH-SFTP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../22%20-%20SSH-SFTP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        22 - SSH/SFTP渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h2 id="_1">基本信息</h2>
+<p>Telnet 是一种网络协议，它为用户提供了一种通过网络访问计算机的不安全的方式。</p>
+<p><strong>默认端口</strong> 23</p>
+<pre><code class="language-bash">23/tcp open  telnet
+</code></pre>
+<h2 id="_2"><strong>枚举</strong></h2>
+<h3 id="banner"><strong>Banner 抓取</strong></h3>
+<pre><code class="language-bash">nc -vn &lt;IP&gt; 23
+</code></pre>
+<p>所有的枚举都可以通过<strong>nmap</strong>执行:</p>
+<pre><code class="language-bash">nmap -n -sV -Pn --script &quot;*telnet* and safe&quot; -p 23 &lt;IP&gt;
+</code></pre>
+<p>该脚本<code>telnet-ntlm-info.nse</code>将获取 NTLM 信息（Windows 版本）。</p>
+<p>在 TELNET 协议中有各种“<strong>选项</strong>”，它们将被批准并可以与“做<strong>、不要、将、不会</strong>”结构一起使用，以允许用户和服务器同意使用更详细的（或者可能只是不同）的 TELNET 连接约定集。此类选项可能包括更改字符集、回显模式等。（来自<a href="https://tools.ietf.org/html/rfc854">telnet RFC</a>）
+<strong>我知道可以枚举此选项，但我不知道如何枚举，所以如果知道如何枚举，请告诉我。</strong></p>
+<h2 id="_3">配置文件</h2>
+<pre><code class="language-bash">/etc/inetd.conf
+/etc/xinetd.d/telnet
+/etc/xinetd.d/stelnet
+</code></pre>
+<h2 id="_4">自动化命令</h2>
+<pre><code class="language-bash">Protocol_Name: Telnet    #协议缩写(如果有的话)。
+Port_Number:  23     #如果有多个，则用逗号分隔。
+Protocol_Description: Telnet          #协议缩写
+
+Entry_1:
+  Name: Notes
+  Description: Notes for t=Telnet
+  Note: |
+    wireshark to hear creds being passed
+    tcp.port == 23 and ip.addr != myip
+
+    https://book.hacktricks.xyz/pentesting/pentesting-telnet
+
+Entry_2:
+  Name: Banner Grab
+  Description: Grab Telnet Banner
+  Command: nc -vn {IP} 23
+
+Entry_3:
+  Name: Nmap with scripts
+  Description: Run nmap scripts for telnet
+  Command: nmap -n -sV -Pn --script &quot;*telnet*&quot; -p 23 {IP}
+
+Entry_4:
+  Name: consoleless mfs enumeration
+  Description: Telnet enumeration without the need to run msfconsole
+  Note: sourced from https://github.com/carlospolop/legion
+  Command: msfconsole -q -x 'use auxiliary/scanner/telnet/telnet_version; set RHOSTS {IP}; set RPORT 23; run; exit' &amp;&amp; msfconsole -q -x 'use auxiliary/scanner/telnet/brocade_enable_login; set RHOSTS {IP}; set RPORT 23; run; exit' &amp;&amp; msfconsole -q -x 'use auxiliary/scanner/telnet/telnet_encrypt_overflow; set RHOSTS {IP}; set RPORT 23; run; exit' &amp;&amp; msfconsole -q -x 'use auxiliary/scanner/telnet/telnet_ruggedcom; set RHOSTS {IP}; set RPORT 23; run; exit'
+
+</code></pre>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../25%2C465%2C587%20-%20SMTPs%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../25%2C465%2C587%20-%20SMTPs%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        25,465,587 - SMTPs渗透测试
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="../22%20-%20SSH-SFTP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../22%20-%20SSH-SFTP%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" class="btn btn-xs btn-link">
+        22 - SSH/SFTP渗透测试
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content">
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="None">Windmill Dark</a> theme by None (noraj).</p>
+</footer>
+
+</body>
+</html>
